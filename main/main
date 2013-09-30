@@ -1,0 +1,18 @@
+package main;
+
+import main.arena.ArenaManager;
+
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class main extends JavaPlugin {
+
+	public void onEnable() {
+		this.getCommand("bombdefuse").setExecutor(new mainCommand());
+		am.load();
+	}
+	
+	public void onDisable() {
+		am.save();
+	}
+	ArenaManager am = new ArenaManager(this);	
+}
