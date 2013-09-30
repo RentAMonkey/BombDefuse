@@ -1,0 +1,28 @@
+package main.arena;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Location;
+
+public class Arena {
+
+	String name;
+	Location lobby;
+	Location spawn;
+	List<String> players = new ArrayList<String>();
+
+	public Arena(String name, Location lobby, Location spawn) {
+		this.name = name;
+		this.lobby = lobby;
+		this.spawn = spawn;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public List<String> getPlayers() {
+		return this.players;
+	}
+}
