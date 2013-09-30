@@ -1,0 +1,153 @@
+package main.arena;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import main.main;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public class ArenaManager {
+
+	private static main plugin;
+
+	public ArenaManager(main plugin) {
+		this.plugin = plugin;
+	}
+
+	public static ArrayList<String> isPlaying = new ArrayList<String>();
+	public Map<String, Location> locs = new HashMap<String, Location>();
+	public static ArenaManager am = new ArenaManager(plugin);
+	Map<String, ItemStack[]> inv = new HashMap<String, ItemStack[]>();
+	Map<String, ItemStack[]> armor = new HashMap<String, ItemStack[]>();
+	public List<Arena> arenas = new ArrayList<Arena>();
+
+	public static ArenaManager getManager() {
+		return am;
+	}
+
+	public Arena getArena(String name) {
+		for (Arena a : arenas) {
+			if (a.getName().equalsIgnoreCase(name)) {
+				return a;
+			}
+		}
+		return null;
+	}
+
+	public void addPlayer(Player p, String name) {
+		Arena arena = getArena(name);
+		if (arena == null) {
+			return;
+		}
+		if (isPlaying(p) == true) {
+			return;
+		}
+		arena.players.add(p.getName());
+		locs.put(p.getName(), p.getLocation());
+		inv.put(p.getName(), p.getInventory().getContents());
+		armor.put(p.getName(), p.getInventory().getArmorContents());
+		p.teleport(arena.spawn);
+		isPlaying.add(p.getName());
+	}
+
+	public void removePlayer(Player p) {
+		Arena a = null;
+		for (Arena arena : arenas) {
+			if (arena.getPlayers().contains(p.getName())) {
+				a = arena;
+			}
+		}
+		if (a == null || !a.getPlayers().contains(p.getName())) {
+			return;
+		}
+
+		a.getPlayers().remove(p.getName());
+		p.getInventory().setContents(inv.get(p.getName()));
+		p.getInventory().setArmorContents(armor.get(p.getName()));
+		p.teleport(locs.get(p.getName()));
+
+		inv.remove(p.getName());
+		armor.remove(p.getName());
+		locs.remove(p.getName());
+		isPlaying.remove(p.getName());
+	}
+
+	public boolean isPlaying(Player p) {
+		if (isPlaying.contains(p.getName())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void save() {
+		plugin.getConfig().set("arenas", null);
+		ConfigurationSection saveSection = plugin.getConfig().createSection(
+				"arenas");
+		for (Arena a : arenas) {
+			String name = a.getName().toString();
+			saveSection.set(name + ".spawn.x", a.spawn.getBlockX());
+			saveSection.set(name + ".spawn.y", a.spawn.getBlockY());
+			saveSection.set(name + ".spawn.z", a.spawn.getBlockZ());
+			saveSection
+					.set(name + ".spawn.world", a.spawn.getWorld().getName());
+			saveSection.set(name + ".lobby.x", a.lobby.getBlockX());
+			saveSection.set(name + ".lobby.y", a.lobby.getBlockY());
+			saveSection.set(name + ".lobby.z", a.lobby.getBlockZ());
+			saveSection
+					.set(name + ".lobby.world", a.lobby.getWorld().getName());
+		}
+		plugin.saveConfig();
+	}
+
+	public void load() {
+		ConfigurationSection loadSection = plugin.getConfig()
+				.getConfigurationSection("arenas");
+		if (loadSection != null) {
+			for (String name : loadSection.getKeys(false)) {
+				int spawnx = loadSection.getInt(name + ".spawn.x");
+				int spawny = loadSection.getInt(name + ".spawn.y");
+				int spawnz = loadSection.getInt(name + ".spawn.z");
+				String spawnworld = loadSection
+						.getString(name + ".spawn.world");
+				int lobbyx = loadSection.getInt(name + ".lobby.x");
+				int lobbyy = loadSection.getInt(name + ".lobby.y");
+				int lobbyz = loadSection.getInt(name + ".lobby.z");
+				String lobbyworld = loadSection
+						.getString(name + ".lobby.world");
+				Location spawn = new Location(Bukkit.getWorld(spawnworld),
+						spawnx, spawny, spawnz);
+				Location lobby = new Location(Bukkit.getWorld(lobbyworld),
+						lobbyx, lobbyy, lobbyz);
+				Arena a = new Arena(name, spawn, lobby);
+				arenas.add(a);
+			}
+		}
+	}
+
+	public void create(Player p, String name) {
+		String Prefix = "§7[§cBD§7]§f ";
+		ItemStack wand = new ItemStack(Material.PUMPKIN_STEM);
+		ItemMeta meta = wand.getItemMeta();
+		meta.setDisplayName("§2§bCREATION WAND");
+		wand.setItemMeta(meta);
+		if (this.getArena(name) != null) {
+			p.sendMessage(Prefix + "§4This arena already exists!");
+		} else {
+			p.sendMessage(Prefix + "§aYou started the creation of arena: "
+					+ "§6" + name);
+			p.getItemInHand().setType(Material.PUMPKIN_STEM);
+			p.getItemInHand().setItemMeta(meta);
+			
+		}
+	}
+}
