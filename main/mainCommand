@@ -1,0 +1,48 @@
+package main;
+
+import main.arena.Arena;
+import main.arena.ArenaManager;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class mainCommand implements CommandExecutor {
+
+	ArenaManager am = ArenaManager.getManager();
+
+	@Override
+	public boolean onCommand(CommandSender cs, Command cmd, String label,
+			String[] args) {
+		if (!(cs instanceof Player)) {
+			cs.sendMessage("§7[§cBD§7] §4You can't execute commands. Silly console.");
+		} else if (args.length == 0) {
+			String Prefix = "§7[§cBD§7] ";
+			Player p = (Player) cs;
+			p.sendMessage(Prefix + "§aBomb Defuse v1.0 created by RentAMonkey.");
+			p.sendMessage(Prefix
+					+ "§aType §6/bd help §afor a list of commands.");
+		} else if (args.length >= 1) {
+			String Prefix = "§7[§cBD§7] ";
+			Player p = (Player) cs;
+			if (args[0].equalsIgnoreCase("help")) {
+				p.sendMessage(Prefix + "§aThis is the help menu.");
+			}
+			if (args[0].equalsIgnoreCase("create")) {
+				Arena a = new Arena(args[1], p.getLocation(), p.getLocation());
+				am.arenas.add(a);
+				am.save();
+				p.sendMessage(Prefix + "§aArena§6 " + args[1] + "§a created.");
+			} else if (args[0].equalsIgnoreCase("join")) {
+				String arena = args[1];
+				am.addPlayer(p, arena);
+				p.sendMessage(am.getArena(arena).getPlayers().toString());
+			} else if (args[0].equalsIgnoreCase("leave")) {
+				am.removePlayer(p);
+				p.sendMessage(Prefix + "§aYou left your current game.");
+			}
+		}
+		return true;
+	}
+}
