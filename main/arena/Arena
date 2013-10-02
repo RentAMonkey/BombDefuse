@@ -7,9 +7,12 @@ import org.bukkit.Location;
 
 public class Arena {
 
-	String name;
-	Location lobby;
-	Location spawn;
+	String name = null;
+	Location lobby = null;
+	Location spawn = null;
+	int minutes = 0;
+	int seconds = 0;
+	String status = null;
 	List<String> players = new ArrayList<String>();
 
 	public Arena(String name, Location lobby, Location spawn) {
@@ -24,5 +27,17 @@ public class Arena {
 
 	public List<String> getPlayers() {
 		return this.players;
+	}
+	
+	public String getStatus() {
+		return this.status;	
+	}
+	
+	public int getMinutes() {
+		return this.minutes;
+	}
+	
+	public int getSeconds() {
+		return this.seconds;
 	}
 }
