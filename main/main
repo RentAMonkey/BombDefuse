@@ -1,18 +1,37 @@
 package main;
 
-import main.arena.ArenaManager;
+import java.util.List;
 
+import main.arena.Arena;
+import main.arena.ArenaManager;
+import main.listeners.BlockListener;
+import main.listeners.PlayerListener;
+
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class main extends JavaPlugin {
 
+	ArenaManager am = ArenaManager.getManager();
+
 	public void onEnable() {
 		this.getCommand("bombdefuse").setExecutor(new mainCommand());
+		PluginManager pm = this.getServer().getPluginManager();
+		pm.registerEvents(new PlayerListener(), this);
+		pm.registerEvents(new BlockListener(), this);
 		am.load();
 	}
-	
+
 	public void onDisable() {
+		for (Arena a : am.arenas) {
+			 List<String> players = a.getPlayers();
+			 for(String p : players) {
+				 am.removePlayer(this.getServer().getPlayer(p));
+				 this.getServer().getPlayer(p).sendMessage("§7[§cBD§7] §cYou were moved out of your game, because of a server reload."); 
+			 }
+		}
 		am.save();
 	}
-	ArenaManager am = new ArenaManager(this);	
+
+	ArenaManager arenamanager = new ArenaManager(this);
 }
